@@ -1,0 +1,68 @@
+---
+version: '2'
+networks:
+  vlan135:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+      - subnet: 10.0.135.0/24
+        gateway: 10.0.135.254
+
+services:
+  kapacitor:
+    build: .
+    container_name: kapacitor
+    image: kapacitor:latest
+    hostname: kapacitor
+    networks:
+      vlan135:
+        ipv4_address: 10.0.135.208
+    privileged: true
+    stdin_open: true
+    volumes:
+      - ../:/home/
+      - /home/antonio/Bureau/docker/files/docker-entrypoint.d:/docker-entrypoint.d
+    cap_add:
+      - ALL
+
+  influxdb:
+    build: .
+    container_name: influxdb
+    image: influxdb2:latest
+    hostname: influxdb
+    networks:
+      vlan135:
+        ipv4_address: 10.0.135.209
+    ports:
+      - "8083-8083"
+      - "8086-8086"
+      - "25826-25826"
+    privileged: true
+    stdin_open: true
+    volumes:
+      - /home/antonio/Bureau/docker/files/types.db:/usr/share/collectd/types.db
+      - /home/antonio/Bureau/docker/files/influxdb.conf:/etc/influxdb/influxdb.conf
+      - /home/antonio/Bureau/docker/files/docker-entrypoint.d:/docker-entrypoint.d
+    cap_add:
+      - ALL
+
+  grafana:
+    build: .
+    container_name: grafana
+    image: grafana/grafana
+    hostname: grafana
+    networks:
+      vlan135:
+        ipv4_address: 10.0.135.210
+    ports:
+      - "3000-3000"
+    #entrypoint: /docker-entrypoint.d/parts_entrypoint.sh
+    privileged: true
+    stdin_open: true
+    volumes:
+      - /home/antonio/Bureau/docker/files/grafana/grafana.ini:/etc/grafana/grafana.ini
+      - /home/antonio/Bureau/docker/files/grafana/ldap.toml:/etc/grafana/ldap.toml
+      - /home/antonio/Bureau/docker/files/docker-entrypoint.d:/docker-entrypoint.d
+    cap_add:
+      - ALL

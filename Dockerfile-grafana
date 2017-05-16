@@ -1,0 +1,14 @@
+FROM grafana/grafana
+
+ENV ANSIBLE_VERSION 2.1
+ENV TERM=xterm
+
+RUN sed -i "s/jessie main/jessie main contrib non-free/" /etc/apt/sources.list
+
+RUN apt-get update --fix-missing && \
+    apt-get install -y lsb-core python-dev python-pip libffi-dev libssl-dev sudo openssh-server openssh-client curl vim apt-transport-https net-tools openssh-client
+
+USER root
+ENV HOME /root/
+
+WORKDIR /root/
